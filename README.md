@@ -1,2 +1,2 @@
-# varroapop_abc
-Analysis of the VarroaPop model and field data using Approximate Bayesian Computation
+# bee_neonic_abc
+Analysis of honey bee colony neonicotinoid feeding study data, using the VarroaPop model and Approximate Bayesian Computation
