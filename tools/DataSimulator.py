@@ -29,13 +29,15 @@ def simulate(pars):
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
     static_pars['NecPolFileEnable'] = 'true'
+    weather_path = os.path.abspath(os.path.join('data', '15057_grid_35.875_lat.wea'))
 
     for index, trt in enumerate(TREATMENTS):
         trt_pars = static_pars.copy()
-        exposure_filename = 'clo_' + trt
+        exposure_filename = 'clo_feeding_' + trt + '.csv'
         exposure_path = os.path.abspath(os.path.join('data', exposure_filename))
         trt_pars['NecPolFileName'] = exposure_path
         reps = REPS[index]
+        rep_responses = np.empty([len(DATES),30,reps]) #survey dates (rows) x output vars (cols) x reps (z axis)
         for rep in range(0,reps):
             vp_pars = trt_pars.copy()
             #generate random gaussian parameters
@@ -45,8 +47,13 @@ def simulate(pars):
                 vp_pars['ICQueenStrength'] = np.random.normal(loc = pars['ICQueenStrength_mean'], scale = pars['ICQueenStrength_sd'])
             while not (vp_pars['ICQueenStrength'] >= 4 and vp_pars['ICQueenStrength'] <= 16):
                 vp_pars['ICForagerLifespan'] = np.random.normal(loc = pars['ICForagerLifespan_mean'], scale = pars['ICForagerLifespan_sd'])
-            vp = VarroaPop(vp_pars, verbose=False, unique=True)
+            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True)
             vp.run_model()
-            output = vp.get_output()
+            rep_responses[:,:,rep] = get_rep_responses(vp.get_output())
+
+
+
+def get_rep_responses(output):
+
 
 
