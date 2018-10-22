@@ -29,7 +29,7 @@ def simulate(pars):
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
     static_pars['NecPolFileEnable'] = 'true'
-    weather_path = os.path.abspath(os.path.join('data', '15057_grid_35.875_lat.wea'))
+    weather_path = os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
 
     for index, trt in enumerate(TREATMENTS):
         trt_pars = static_pars.copy()
