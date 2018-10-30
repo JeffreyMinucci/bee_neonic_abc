@@ -4,6 +4,8 @@ import os
 
 
 DATES = [3, 4, 5, 6, 7]
+DATES_STR = ['06/20/2014', '07/16/2014', '08/08/2014','09/10/2014', '10/15/2014']
+DATES_STR_HIGH = ['06/20/2014', '07/16/2014', '08/08/2014','09/10/2014', '10/21/2014'] #high had a late CCA7
 TREATMENTS = ['0', '10', '20', '40', '80', '160']
 REPS = [24, 12, 12, 12, 12, 12]
 
@@ -49,11 +51,17 @@ def simulate(pars):
                 vp_pars['ICForagerLifespan'] = np.random.normal(loc = pars['ICForagerLifespan_mean'], scale = pars['ICForagerLifespan_sd'])
             vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True)
             vp.run_model()
-            rep_responses[:,:,rep] = get_rep_responses(vp.get_output())
+            if trt == "160":
+                dates = DATES_STR_HIGH
+            else:
+                dates = DATES_STR
+            rep_responses[:,:,rep] = filter_rep_responses(vp.filter_output(), dates_str= dates)
 
 
 
-def get_rep_responses(output):
+def filter_rep_responses(output, dates_str):
+    
+
 
 
 
