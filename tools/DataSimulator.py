@@ -4,21 +4,28 @@ import numpy as np
 import os
 import pandas as pd
 
+#DEBUG options
+LOGS = False
 
 #Start date for sims = CCA3, 06/20/2014
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..','data'))
 INITIAL_DF = os.path.join(DATA_DIR, 'initial_conditions.csv')
+START_DATE = '06/20/2014'
+END_DATE = '10/22/2014'
+
 DATES = ['4', '5', '6', '7']
 DATES_STR = ['07/16/2014', '08/08/2014','09/10/2014', '10/15/2014']
 DATES_STR_HIGH = ['07/16/2014', '08/08/2014','09/10/2014', '10/21/2014'] #high had a late CCA7
 TREATMENTS = ['0', '10', '20', '40', '80', '160']
 REPS = [24, 12, 12, 12, 12, 12]
 #REPS = [3,3,3,3,3,3] #for testing
+#REPS = [1,1,1,1,1,1] #for testing
 RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers', 'Foragers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
                  ('Larvae', ['Drone Larvae', 'Worker Larvae']),  ('Eggs', ['Drone Eggs', 'Worker Eggs'])]
 RESPONSE_FILTER = ['Adults_mean', 'Adults_sd'] #For now use only these responses!
 
-def simulate(pars):
+
+def simulate(pars, save = False, logs = False):
     """
     Simulate data from the colony study using a set of VarroaPop parameters
 
@@ -27,18 +34,23 @@ def simulate(pars):
                 ICQueenStrength_sd
                 ICForagerLifespan_mean
                 ICForagerLifespan_sd
-                AIAdultLD50
+                AIAdultLD50  # in log10!
                 AIAdultSlope
-                AILarvaLD50
+                AILarvaLD50   # in log10!
                 AILarvaSlope
     :return a dictionary of summary stats
     """
     #print(DATA_DIR)
     #print(INITIAL_DF)
-    static_pars = {}
+    static_pars = {'SimStart': START_DATE, 'SimEnd': END_DATE, 'IPollenTrips': 8, 'INectarTrips': 17,
+                   'AIHalfLife': 25, 'RQEnableReQueen': 'false'}
+    pars['AIAdultLD50'] = 10**pars['AIAdultLD50'] #un log transform
+    pars['AILarvaLD50'] = 10**pars['AILarvaLD50'] #un log transform
     for name, value in pars.items():
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
+    #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
+    #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
     #all_responses = pd.DataFrame(index = rows, columns = cols)
@@ -61,7 +73,7 @@ def simulate(pars):
                 vp_pars['ICQueenStrength'] = np.random.normal(loc = float(pars['ICQueenStrength_mean']), scale = float(pars['ICQueenStrength_sd']))
             while not (4 <= vp_pars['ICForagerLifespan'] <= 16):
                 vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(pars['ICForagerLifespan_mean']), scale = float(pars['ICForagerLifespan_sd']))
-            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=False, logs=False)
+            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=save, logs=logs)
             vp.run_model()
             if trt == "160":
                 dates = DATES_STR_HIGH
@@ -125,9 +137,10 @@ def generate_start(pars, trt):
     df.set_index('treatment', inplace=True)
     #print("Initial conditions: {}".format(df))
     vars = ['adult', 'pupae', 'larvae', 'eggs', 'pollen', 'honey'] #numbers to generate
-    vals = []
-    for var in vars:
-        vals.append(np.random.normal(loc = df.loc[trt,var+'_mean'], scale = df.loc[trt,var+'_sd'])) #TODO prevent negative numbers!
+    vals = [-1,-1,-1,-1,-1,-1]
+    for i, var in enumerate(vars):
+        while vals[i] < 0:
+            vals[i] = np.random.normal(loc = df.loc[trt,var+'_mean'], scale = df.loc[trt,var+'_sd'])
     pars['ICWorkerAdults'] = vals[0]
     pars['ICDroneAdults'] = 0
     pars['ICWorkerBrood'] = vals[1]
@@ -136,9 +149,8 @@ def generate_start(pars, trt):
     pars['ICDroneLarvae'] = 0
     pars['ICWorkerEggs'] = vals[3]
     pars['ICDroneEggs'] = 0
-    pars['InitColPollen'] = 20000 #just doing a reasonable estimate for now
-    pars['InitColNectar'] = 20000 #just doing a reasonable estimate for now
-    print(pars)
+    pars['InitColPollen'] = 10000 #just doing a reasonable estimate for now
+    pars['InitColNectar'] = 10000 #just doing a reasonable estimate for now
     return pars
 
 
