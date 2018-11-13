@@ -3,3 +3,5 @@ dask
 pandas
 distributed
 bokeh
+matplotlib
+scipy
