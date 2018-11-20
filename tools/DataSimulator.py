@@ -42,15 +42,15 @@ def simulate(pars, save = False, logs = False):
     """
     #print(DATA_DIR)
     #print(INITIAL_DF)
+    #print(parameters)
+    parameters = pars.copy() #copy our inputs so that we don't ever modify them (pyabc needs these)
     static_pars = {'SimStart': START_DATE, 'SimEnd': END_DATE, 'IPollenTrips': 8, 'INectarTrips': 17,
                    'AIHalfLife': 25, 'RQEnableReQueen': 'false'}
-    pars['AIAdultLD50'] = 10**pars['AIAdultLD50'] #un log transform
-    pars['AILarvaLD50'] = 10**pars['AILarvaLD50'] #un log transform
-    for name, value in pars.items():
+    for name, value in parameters.items():
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
-    #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
-    #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
+    static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
+    static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
     #all_responses = pd.DataFrame(index = rows, columns = cols)
@@ -70,9 +70,9 @@ def simulate(pars, save = False, logs = False):
             vp_pars['ICQueenStrength'] = 0
             vp_pars['ICForagerLifespan'] = 0
             while not (1 <=vp_pars['ICQueenStrength'] <= 5):
-                vp_pars['ICQueenStrength'] = np.random.normal(loc = float(pars['ICQueenStrength_mean']), scale = float(pars['ICQueenStrength_sd']))
+                vp_pars['ICQueenStrength'] = np.random.normal(loc = float(parameters['ICQueenStrength_mean']), scale = float(parameters['ICQueenStrength_sd']))
             while not (4 <= vp_pars['ICForagerLifespan'] <= 16):
-                vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(pars['ICForagerLifespan_mean']), scale = float(pars['ICForagerLifespan_sd']))
+                vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(parameters['ICForagerLifespan_mean']), scale = float(parameters['ICForagerLifespan_sd']))
             vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=save, logs=logs)
             vp.run_model()
             if trt == "160":
@@ -131,7 +131,7 @@ def filter_rep_responses(output, dates_str):
     return response_df
 
 
-def generate_start(pars, trt):
+def generate_start(paras, trt):
     df = pd.read_csv(INITIAL_DF)
     df['treatment'] = df['treatment'].astype('str', copy=True)
     df.set_index('treatment', inplace=True)
@@ -141,16 +141,16 @@ def generate_start(pars, trt):
     for i, var in enumerate(vars):
         while vals[i] < 0:
             vals[i] = np.random.normal(loc = df.loc[trt,var+'_mean'], scale = df.loc[trt,var+'_sd'])
-    pars['ICWorkerAdults'] = vals[0]
-    pars['ICDroneAdults'] = 0
-    pars['ICWorkerBrood'] = vals[1]
-    pars['ICDroneBrood'] = 0
-    pars['ICWorkerLarvae'] = vals[2]
-    pars['ICDroneLarvae'] = 0
-    pars['ICWorkerEggs'] = vals[3]
-    pars['ICDroneEggs'] = 0
-    pars['InitColPollen'] = 10000 #just doing a reasonable estimate for now
-    pars['InitColNectar'] = 10000 #just doing a reasonable estimate for now
-    return pars
+    paras['ICWorkerAdults'] = vals[0]
+    paras['ICDroneAdults'] = 0
+    paras['ICWorkerBrood'] = vals[1]
+    paras['ICDroneBrood'] = 0
+    paras['ICWorkerLarvae'] = vals[2]
+    paras['ICDroneLarvae'] = 0
+    paras['ICWorkerEggs'] = vals[3]
+    paras['ICDroneEggs'] = 0
+    paras['InitColPollen'] = vals[4] * 0.425 #based off 0.293 cm3 cell volume and 1.45 g/cm3 pollen density
+    paras['InitColNectar'] = vals[5] * 0.331 #based off 0.293 cm3 cell volume and 1.13 g/cm3 nectar density
+    return paras
 
 
