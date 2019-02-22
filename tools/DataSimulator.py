@@ -3,6 +3,7 @@ from itertools import product
 import numpy as np
 import os
 import pandas as pd
+import datetime
 
 #DEBUG options
 LOGS = False
@@ -154,3 +155,86 @@ def generate_start(paras, trt):
     return paras
 
 
+
+def simulate_all_dates(pars, save = False, logs = False):
+    """
+    Simulate data from the colony study using a set of VarroaPop parameters.
+    This version returns the adult population at every single date. This will be
+    used to create posterior predictive plots.
+
+    :param pars: Dictionary of parameters to vary.
+                ICQueenStrength_mean
+                ICQueenStrength_sd
+                ICForagerLifespan_mean
+                ICForagerLifespan_sd
+                AIAdultLD50  # in log10!
+                AIAdultSlope
+                AILarvaLD50   # in log10!
+                AILarvaSlope
+    :return an array of adult pops (treatment x day)
+    """
+    start = datetime.datetime.strptime(START_DATE, "%m/%d/%Y")
+    end = datetime.datetime.strptime(DATES_STR_HIGH[3], "%m/%d/%Y")
+    all_dates = [(start + datetime.timedelta(days=x)).strftime("%m/%d/%Y") for x in range(0, (end - start).days)]
+    parameters = pars.copy() #copy our inputs so that we don't ever modify them (pyabc needs these)
+    static_pars = {'SimStart': START_DATE, 'SimEnd': END_DATE, 'IPollenTrips': 8, 'INectarTrips': 17,
+                   'AIHalfLife': 25, 'RQEnableReQueen': 'false'}
+    for name, value in parameters.items():
+        if not name.endswith(('_mean','_sd')):
+            static_pars[name] = value
+    static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
+    static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
+    static_pars['NecPolFileEnable'] = 'true'
+    weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
+    #all_responses = pd.DataFrame(index = rows, columns = cols)
+    all_responses = pd.DataFrame()
+    for index, trt in enumerate(TREATMENTS):
+        trt_responses_mean = np.empty((len(DATES), len(RESPONSE_VARS)))
+        trt_responses_sd = np.empty((len(DATES), len(RESPONSE_VARS)))
+        trt_pars = static_pars.copy()
+        exposure_filename = 'clo_feeding_' + trt + '.csv'
+        exposure_path = os.path.join(DATA_DIR, exposure_filename)#os.path.abspath(os.path.join('data', exposure_filename))
+        trt_pars['NecPolFileName'] = exposure_path
+        reps = REPS[index]
+        rep_responses = np.empty(([len(all_dates),len(RESPONSE_VARS),reps])) #survey dates (rows) x output vars (cols) x reps (z axis)
+        for rep in range(0,reps):
+            vp_pars = generate_start(trt_pars.copy(), trt)
+            #generate random gaussian parameters
+            vp_pars['ICQueenStrength'] = 0
+            vp_pars['ICForagerLifespan'] = 0
+            while not (1 <=vp_pars['ICQueenStrength'] <= 5):
+                vp_pars['ICQueenStrength'] = np.random.normal(loc = float(parameters['ICQueenStrength_mean']), scale = float(parameters['ICQueenStrength_sd']))
+            while not (4 <= vp_pars['ICForagerLifespan'] <= 16):
+                vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(parameters['ICForagerLifespan_mean']), scale = float(parameters['ICForagerLifespan_sd']))
+            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=save, logs=logs)
+            vp.run_model()
+            rep_responses[:,:,rep] = filter_rep_responses(vp.get_output(), dates_str= all_dates)
+        mean_cols = [var[0]+"_mean" for var in RESPONSE_VARS]
+        sd_cols = [var[0]+"_sd" for var in RESPONSE_VARS]
+        trt_responses_mean = pd.DataFrame(np.mean(rep_responses,axis=2), columns = mean_cols)
+        trt_responses_sd = pd.DataFrame(np.std(rep_responses,axis=2, ddof=1), columns = sd_cols) # Note: uses sample sd, not population sd
+        trt_responses = pd.concat([trt_responses_mean, trt_responses_sd], axis = 1)
+        #print("Treatment {} responses: {}".format(trt,trt_responses))
+        start_row = len(DATES)*index
+        end_row = start_row + len(DATES)
+        #all_responses.loc[start_row:end_row,:] = trt_responses
+        all_responses = all_responses.append(trt_responses, ignore_index=True)
+
+    #Generate labels for rows and columns
+    rows = ['_'.join(x) for x in product(TREATMENTS, all_dates)]
+    #print('Row labels: {}'.format(rows))
+    response_cols = [x[0] for x in RESPONSE_VARS]
+    cols = ['_'.join([x,y]) for y in ['mean', 'sd'] for x in response_cols]
+    #print('Col labels: {}'.format(cols))
+
+    all_responses['Index'] = pd.Series(rows) #Add our row labels
+    all_responses.set_index("Index", inplace=True) #Set row labels to be the index
+    #print('Final result: {}'.format(all_responses))
+    filtered_resp = all_responses.loc[:,'Adults_mean'] #Keep only the mean number of adults
+    n_dates = len(all_dates)
+    wide = np.empty([6,n_dates])
+    for i in range(6):
+        wide[i,:] = filtered_resp.iloc[i*n_dates:(i+1)*n_dates]
+    wide_df = pd.DataFrame(wide, index = ["0", "10", "20", "40", "80", "160"],
+                           columns = all_dates)
+    return wide_df
