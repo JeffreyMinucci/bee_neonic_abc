@@ -159,7 +159,7 @@ def generate_start(paras, trt):
 def simulate_all_dates(pars, save = False, logs = False):
     """
     Simulate data from the colony study using a set of VarroaPop parameters.
-    This version returns the adult population at every single date. This will be
+    This version returns the population at every single date. This will be
     used to create posterior predictive plots.
 
     :param pars: Dictionary of parameters to vary.
@@ -171,7 +171,7 @@ def simulate_all_dates(pars, save = False, logs = False):
                 AIAdultSlope
                 AILarvaLD50   # in log10!
                 AILarvaSlope
-    :return an array of adult pops (treatment x day)
+    :return a 3d array of varroapop summary stats(treatment x day x adult/pupae/larvae/eggs)
     """
     start = datetime.datetime.strptime(START_DATE, "%m/%d/%Y")
     end = datetime.datetime.strptime(DATES_STR_HIGH[3], "%m/%d/%Y")
@@ -222,19 +222,21 @@ def simulate_all_dates(pars, save = False, logs = False):
 
     #Generate labels for rows and columns
     rows = ['_'.join(x) for x in product(TREATMENTS, all_dates)]
-    #print('Row labels: {}'.format(rows))
     response_cols = [x[0] for x in RESPONSE_VARS]
     cols = ['_'.join([x,y]) for y in ['mean', 'sd'] for x in response_cols]
-    #print('Col labels: {}'.format(cols))
 
     all_responses['Index'] = pd.Series(rows) #Add our row labels
     all_responses.set_index("Index", inplace=True) #Set row labels to be the index
     #print('Final result: {}'.format(all_responses))
-    filtered_resp = all_responses.loc[:,'Adults_mean'] #Keep only the mean number of adults
+    #filtered_resp = all_responses.loc[:,'Adults_mean'] #Keep only the mean number of adults
     n_dates = len(all_dates)
-    wide = np.empty([6,n_dates])
-    for i in range(6):
-        wide[i,:] = filtered_resp.iloc[i*n_dates:(i+1)*n_dates]
-    wide_df = pd.DataFrame(wide, index = ["0", "10", "20", "40", "80", "160"],
-                           columns = all_dates)
-    return wide_df
+    return_dfs = {}
+    for response in RESPONSE_VARS:
+        filtered_resp = all_responses.loc[:,response[0]+"_mean"]
+        wide = np.empty([6,n_dates]) #6 treatments, n_dates days,
+        for i in range(6):
+            wide[i,:] = filtered_resp.iloc[i*n_dates:(i+1)*n_dates]
+        wide_df = pd.DataFrame(wide, index = ["0", "10", "20", "40", "80", "160"],
+                        columns = all_dates)
+        return_dfs[response[0]] = wide_df
+    return return_dfs
