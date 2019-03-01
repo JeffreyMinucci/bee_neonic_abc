@@ -1,4 +1,4 @@
-treatment,adult_mean,adult_sd,eggs_mean,eggs_sd,larvae_mean,larvae_sd,pupae_mean,pupae_sd,pollen_mean,pollen_sd,honey_mean,honey_sd
+treatment,adults_mean,adults_sd,eggs_mean,eggs_sd,larvae_mean,larvae_sd,pupae_mean,pupae_sd,pollen_mean,pollen_sd,honey_mean,honey_sd
 0,15014,5092,6394,3038.347077,9801,3358.250437,17295,3591.931759,5690.6,2348.570765,45266.5,22762.12838
 10,10213,4745,6815,2958.689189,9892,3320.341398,18725,3379.231126,5624.3,2345.543204,38178.5,21454.56694
 20,15217,5024,6435,2958.689189,8883,3320.341398,18643,3379.231126,5161.2,2345.543204,47193.7,21454.56694

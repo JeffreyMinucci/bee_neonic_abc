@@ -137,7 +137,7 @@ def generate_start(paras, trt):
     df['treatment'] = df['treatment'].astype('str', copy=True)
     df.set_index('treatment', inplace=True)
     #print("Initial conditions: {}".format(df))
-    vars = ['adult', 'pupae', 'larvae', 'eggs', 'pollen', 'honey'] #numbers to generate
+    vars = ['adults', 'pupae', 'larvae', 'eggs', 'pollen', 'honey'] #numbers to generate
     vals = [-1,-1,-1,-1,-1,-1]
     for i, var in enumerate(vars):
         while vals[i] < 0:
