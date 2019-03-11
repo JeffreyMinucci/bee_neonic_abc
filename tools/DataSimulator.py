@@ -13,6 +13,8 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__
 INITIAL_DF = os.path.join(DATA_DIR, 'initial_conditions.csv')
 START_DATE = '06/20/2014'
 END_DATE = '10/22/2014'
+VRP_FILE = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                        '..','varroapop_sessions', 'feeding_study.vrp'))
 
 DATES = ['4', '5', '6', '7']
 DATES_STR = ['07/16/2014', '08/08/2014','09/10/2014', '10/15/2014']
@@ -35,9 +37,9 @@ def simulate(pars, save = False, logs = False):
                 ICQueenStrength_sd
                 ICForagerLifespan_mean
                 ICForagerLifespan_sd
-                AIAdultLD50  # in log10!
+                AIAdultLD50
                 AIAdultSlope
-                AILarvaLD50   # in log10!
+                AILarvaLD50
                 AILarvaSlope
     :return a dictionary of summary stats
     """
@@ -50,8 +52,8 @@ def simulate(pars, save = False, logs = False):
     for name, value in parameters.items():
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
-    static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
-    static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
+    #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
+    #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
     #all_responses = pd.DataFrame(index = rows, columns = cols)
@@ -74,7 +76,8 @@ def simulate(pars, save = False, logs = False):
                 vp_pars['ICQueenStrength'] = np.random.normal(loc = float(parameters['ICQueenStrength_mean']), scale = float(parameters['ICQueenStrength_sd']))
             while not (4 <= vp_pars['ICForagerLifespan'] <= 16):
                 vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(parameters['ICForagerLifespan_mean']), scale = float(parameters['ICForagerLifespan_sd']))
-            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=save, logs=logs)
+            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, vrp_file = VRP_FILE,
+                           verbose=False, unique=True, keep_files=save, logs=logs)
             vp.run_model()
             if trt == "160":
                 dates = DATES_STR_HIGH
@@ -167,9 +170,9 @@ def simulate_all_dates(pars, save = False, logs = False):
                 ICQueenStrength_sd
                 ICForagerLifespan_mean
                 ICForagerLifespan_sd
-                AIAdultLD50  # in log10!
+                AIAdultLD50
                 AIAdultSlope
-                AILarvaLD50   # in log10!
+                AILarvaLD50
                 AILarvaSlope
     :return a 3d array of varroapop summary stats(treatment x day x adult/pupae/larvae/eggs)
     """
@@ -182,8 +185,8 @@ def simulate_all_dates(pars, save = False, logs = False):
     for name, value in parameters.items():
         if not name.endswith(('_mean','_sd')):
             static_pars[name] = value
-    static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
-    static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
+    #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
+    #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
     #all_responses = pd.DataFrame(index = rows, columns = cols)
@@ -206,7 +209,8 @@ def simulate_all_dates(pars, save = False, logs = False):
                 vp_pars['ICQueenStrength'] = np.random.normal(loc = float(parameters['ICQueenStrength_mean']), scale = float(parameters['ICQueenStrength_sd']))
             while not (4 <= vp_pars['ICForagerLifespan'] <= 16):
                 vp_pars['ICForagerLifespan'] = np.random.normal(loc = float(parameters['ICForagerLifespan_mean']), scale = float(parameters['ICForagerLifespan_sd']))
-            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, verbose=False, unique=True, keep_files=save, logs=logs)
+            vp = VarroaPop(parameters = vp_pars, weather_file = weather_path, vrp_file = VRP_FILE,
+                           verbose=False, unique=True, keep_files=save, logs=logs)
             vp.run_model()
             rep_responses[:,:,rep] = filter_rep_responses(vp.get_output(), dates_str= all_dates)
         mean_cols = [var[0]+"_mean" for var in RESPONSE_VARS]
