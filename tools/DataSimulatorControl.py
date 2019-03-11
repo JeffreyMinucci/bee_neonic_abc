@@ -22,9 +22,9 @@ TREATMENTS = ['0']
 REPS = [24]
 #REPS = [3,3,3,3,3,3] #for testing
 #REPS = [1,1,1,1,1,1] #for testing
-RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers', 'Foragers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
+RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
                  ('Larvae', ['Drone Larvae', 'Worker Larvae']),  ('Eggs', ['Drone Eggs', 'Worker Eggs'])]
-RESPONSE_FILTER = ['Adults_mean', 'Adults_sd'] #For now use only these responses!
+RESPONSE_FILTER = ['Adults_mean', 'Adults_sd', 'Eggs_mean', 'Eggs_sd'] #For now use only these responses!
 
 
 def simulate(pars, save = False, logs = False):
