@@ -145,7 +145,7 @@ def generate_start(paras, trt):
     for i, var in enumerate(vars):
         while vals[i] < 0:
             vals[i] = np.random.normal(loc = df.loc[trt,var+'_mean'], scale = df.loc[trt,var+'_sd'])
-    paras['ICWorkerAdults'] = vals[0]
+    paras['ICWorkerAdults'] = vals[0] / 0.7 # increase to account for unseen foragers in VP
     paras['ICDroneAdults'] = 0
     paras['ICWorkerBrood'] = vals[1]
     paras['ICDroneBrood'] = 0
