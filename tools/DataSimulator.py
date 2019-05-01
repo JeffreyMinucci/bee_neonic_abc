@@ -243,4 +243,12 @@ def simulate_all_dates(pars, save = False, logs = False):
         wide_df = pd.DataFrame(wide, index = ["0", "10", "20", "40", "80", "160"],
                         columns = all_dates)
         return_dfs[response[0]] = wide_df
+    # add all individuals sum
+    all_ind_mean = all_responses.loc[:,all_responses.columns.str.contains('_mean')].sum(axis=1)
+    wide = np.empty([6, n_dates])  # 6 treatments, n_dates days,
+    for i in range(6):
+        wide[i, :] = all_ind_mean.iloc[i * n_dates:(i + 1) * n_dates]
+    wide_df = pd.DataFrame(wide, index=["0", "10", "20", "40", "80", "160"],
+                           columns=all_dates)
+    return_dfs["All"] = wide_df
     return return_dfs
