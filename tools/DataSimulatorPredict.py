@@ -147,18 +147,19 @@ def simulate_all_dates_p(pars, save = False, logs = False):
     return_dfs = {}
     for response in RESPONSE_VARS:
         filtered_resp = all_responses.loc[:,response[0]+"_mean"]
-        wide = np.empty([6,n_dates]) #6 treatments, n_dates days,
-        for i in range(6):
+        #print('Filtered resp: {}'.format(filtered_resp))
+        wide = np.empty([5,n_dates]) #5 treatments, n_dates days,
+        for i in range(5):
             wide[i,:] = filtered_resp.iloc[i*n_dates:(i+1)*n_dates]
-        wide_df = pd.DataFrame(wide, index = ["0", "10", "20", "40", "80", "160"],
+        wide_df = pd.DataFrame(wide, index = ['50', '55', '60', '65', '70'],
                         columns = all_dates)
         return_dfs[response[0]] = wide_df
     # add all individuals sum
     all_ind_mean = all_responses.loc[:,all_responses.columns.str.contains('_mean')].sum(axis=1)
-    wide = np.empty([6, n_dates])  # 6 treatments, n_dates days,
-    for i in range(6):
+    wide = np.empty([5, n_dates])  # 5 treatments, n_dates days,
+    for i in range(5):
         wide[i, :] = all_ind_mean.iloc[i * n_dates:(i + 1) * n_dates]
-    wide_df = pd.DataFrame(wide, index=["0", "10", "20", "40", "80", "160"],
+    wide_df = pd.DataFrame(wide, index=['50', '55', '60', '65', '70'],
                            columns=all_dates)
     return_dfs["All"] = wide_df
     return return_dfs
