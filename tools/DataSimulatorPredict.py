@@ -19,8 +19,8 @@ VRP_FILE = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__
 DATES = ['4', '5', '6', '7']
 DATES_STR = ['07/16/2014', '08/08/2014','09/10/2014', '10/15/2014']
 DATES_STR_HIGH = ['07/16/2014', '08/08/2014','09/10/2014', '10/21/2014'] #high had a late CCA7
-TREATMENTS = ['50', '55', '60', '65', '70']
-REPS = [12, 12, 12, 12, 12]
+TREATMENTS = ['0','50', '55', '60', '65', '70']
+REPS = [12, 12, 12, 12, 12, 12]
 #REPS = [3,3,3,3,3,3] #for testing
 #REPS = [1,1,1,1,1,1] #for testing
 RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
@@ -148,18 +148,18 @@ def simulate_all_dates_p(pars, save = False, logs = False):
     for response in RESPONSE_VARS:
         filtered_resp = all_responses.loc[:,response[0]+"_mean"]
         #print('Filtered resp: {}'.format(filtered_resp))
-        wide = np.empty([5,n_dates]) #5 treatments, n_dates days,
-        for i in range(5):
+        wide = np.empty([6,n_dates]) #6 treatments, n_dates days,
+        for i in range(6):
             wide[i,:] = filtered_resp.iloc[i*n_dates:(i+1)*n_dates]
-        wide_df = pd.DataFrame(wide, index = ['50', '55', '60', '65', '70'],
+        wide_df = pd.DataFrame(wide, index = ['0','50', '55', '60', '65', '70'],
                         columns = all_dates)
         return_dfs[response[0]] = wide_df
     # add all individuals sum
     all_ind_mean = all_responses.loc[:,all_responses.columns.str.contains('_mean')].sum(axis=1)
-    wide = np.empty([5, n_dates])  # 5 treatments, n_dates days,
-    for i in range(5):
+    wide = np.empty([6, n_dates])  # 6 treatments, n_dates days,
+    for i in range(6):
         wide[i, :] = all_ind_mean.iloc[i * n_dates:(i + 1) * n_dates]
-    wide_df = pd.DataFrame(wide, index=['50', '55', '60', '65', '70'],
+    wide_df = pd.DataFrame(wide, index=['0','50', '55', '60', '65', '70'],
                            columns=all_dates)
     return_dfs["All"] = wide_df
     return return_dfs
