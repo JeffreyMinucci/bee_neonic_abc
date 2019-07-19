@@ -174,7 +174,7 @@ def simulate_all_dates(pars, save = False, logs = False):
                 AIAdultSlope
                 AILarvaLD50
                 AILarvaSlope
-    :return a 3d array of varroapop summary stats(treatment x day x adult/pupae/larvae/eggs)
+    :return a dict of arrays of varroapop summary stats(treatment x day) for adult/pupae/larvae/eggs/all)
     """
     start = datetime.datetime.strptime(START_DATE, "%m/%d/%Y")
     end = datetime.datetime.strptime(DATES_STR_HIGH[3], "%m/%d/%Y")
