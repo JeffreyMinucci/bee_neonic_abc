@@ -24,7 +24,8 @@ REPS = [24, 12, 12, 12, 12, 12]
 #REPS = [3,3,3,3,3,3] #for testing
 #REPS = [1,1,1,1,1,1] #for testing
 RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
-                 ('Larvae', ['Drone Larvae', 'Worker Larvae']),  ('Eggs', ['Drone Eggs', 'Worker Eggs'])]
+                 ('Larvae', ['Drone Larvae', 'Worker Larvae']),  ('Eggs', ['Drone Eggs', 'Worker Eggs']),
+                ('Pollen', ['Colony Pollen (g)']), ('Nectar', ['Colony Nectar'])]
 RESPONSE_FILTER = ['Adults_mean', 'Adults_sd', 'Eggs_mean', 'Eggs_sd'] #For now use only these responses!
 
 
@@ -174,7 +175,7 @@ def simulate_all_dates(pars, save = False, logs = False):
                 AIAdultSlope
                 AILarvaLD50
                 AILarvaSlope
-    :return a dict of arrays of varroapop summary stats(treatment x day) for adult/pupae/larvae/eggs/all)
+    :return a dict of arrays of varroapop summary stats(treatment x day) for adult/pupae/larvae/eggs/all/pollen/nectar)
     """
     start = datetime.datetime.strptime(START_DATE, "%m/%d/%Y")
     end = datetime.datetime.strptime(DATES_STR_HIGH[3], "%m/%d/%Y")
