@@ -1,5 +1,11 @@
 *.npy
 
+# Outdated debugging and test files
+pyabc_control_only.ipynb
+convert_transition_rate.ipynb
+dask_test.ipynb
+simulator_test.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
