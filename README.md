@@ -1,3 +1,5 @@
+![doi badge](https://zenodo.org/badge/DOI/10.5281/zenodo.3460985.svg)
+
 # Analysis of honey bee colony pesticide feeding study data using the VarroaPop+Pesticide model and Approximate Bayesian Computation.
 
 This code supports **Minucci et al. 2019.** *Inferring pesticide toxicity to honey bees from a field-based feeding study using a colony dynamics model and Bayesian inference*
