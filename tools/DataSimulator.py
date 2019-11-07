@@ -10,7 +10,7 @@ LOGS = False
 
 #Start date for sims = CCA3, 06/20/2014
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..','data'))
-INITIAL_DF = os.path.join(DATA_DIR, 'initial_conditions.csv')
+INITIAL_DF = os.path.join(DATA_DIR, '/bee_counts/initial_conditions.csv')
 START_DATE = '06/20/2014'
 END_DATE = '10/22/2014'
 VRP_FILE = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -56,7 +56,7 @@ def simulate(pars, save = False, logs = False):
     #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
     #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
-    weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
+    weather_path = os.path.join(DATA_DIR,'/weather/15055_grid_35.875_lat.wea')
     #all_responses = pd.DataFrame(index = rows, columns = cols)
     all_responses = pd.DataFrame()
     for index, trt in enumerate(TREATMENTS):
@@ -64,7 +64,7 @@ def simulate(pars, save = False, logs = False):
         trt_responses_sd = np.empty((len(DATES), len(RESPONSE_VARS)))
         trt_pars = static_pars.copy()
         exposure_filename = 'clo_feeding_' + trt + '.csv'
-        exposure_path = os.path.join(DATA_DIR, exposure_filename)#os.path.abspath(os.path.join('data', exposure_filename))
+        exposure_path = os.path.join(DATA_DIR, '/food_concentrations/',exposure_filename)
         trt_pars['NecPolFileName'] = exposure_path
         reps = REPS[index]
         rep_responses = np.empty(([len(DATES),len(RESPONSE_VARS),reps])) #survey dates (rows) x output vars (cols) x reps (z axis)
@@ -189,7 +189,7 @@ def simulate_all_dates(pars, save = False, logs = False):
     #static_pars['AIAdultLD50'] = 10**static_pars['AIAdultLD50'] #un log transform
     #static_pars['AILarvaLD50'] = 10**static_pars['AILarvaLD50'] #un log transform
     static_pars['NecPolFileEnable'] = 'true'
-    weather_path = os.path.join(DATA_DIR,'15055_grid_35.875_lat.wea')# os.path.abspath(os.path.join('data', '15055_grid_35.875_lat.wea'))
+    weather_path = os.path.join(DATA_DIR,'/weather/15055_grid_35.875_lat.wea')
     #all_responses = pd.DataFrame(index = rows, columns = cols)
     all_responses = pd.DataFrame()
     for index, trt in enumerate(TREATMENTS):
@@ -197,7 +197,7 @@ def simulate_all_dates(pars, save = False, logs = False):
         trt_responses_sd = np.empty((len(DATES), len(RESPONSE_VARS)))
         trt_pars = static_pars.copy()
         exposure_filename = 'clo_feeding_' + trt + '.csv'
-        exposure_path = os.path.join(DATA_DIR, exposure_filename)#os.path.abspath(os.path.join('data', exposure_filename))
+        exposure_path = os.path.join(DATA_DIR, '/food_concentrations/', exposure_filename)
         trt_pars['NecPolFileName'] = exposure_path
         reps = REPS[index]
         rep_responses = np.empty(([len(all_dates),len(RESPONSE_VARS),reps])) #survey dates (rows) x output vars (cols) x reps (z axis)
