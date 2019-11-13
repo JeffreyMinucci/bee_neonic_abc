@@ -6,7 +6,17 @@ This code supports **Minucci et al. 2019.** *Inferring pesticide toxicity to hon
 
 <br>
 
-We utilize the VarroaPy python package, written by Jeffrey Minucci, which wraps the VarroaPop+Pesticide program (written in C++ and the MFC library). This package is included as a submodule, but it's standalone repo can be found [here.](https://github.com/quanted/VarroaPy/)
+How to set up this repo:
+
+```
+git clone https://github.com/JeffreyMinucci/bee_neonic_abc.git
+cd bee_neonic_abc
+git submodule update --init
+```
+
+<br>
+
+We utilize the VarroaPy python package, which wraps the VarroaPop+Pesticide program (written in C++ and the MFC library). This package is included as a submodule, but it's standalone repo can be found [here.](https://github.com/quanted/VarroaPy/)
 
 <br>
 
