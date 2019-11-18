@@ -115,6 +115,3 @@ venv.bak/
 dask-worker-space
 
 .idea/
-
-#sql databases
-results_db/*.db
