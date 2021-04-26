@@ -21,8 +21,6 @@ DATES_STR = ['07/16/2014', '08/08/2014','09/10/2014', '10/15/2014']
 DATES_STR_HIGH = ['07/16/2014', '08/08/2014','09/10/2014', '10/21/2014']  # high had a late CCA7
 TREATMENTS = ['0', '10', '20', '40', '80', '160']
 REPS = [24, 12, 12, 12, 12, 12]
-#REPS = [3,3,3,3,3,3]  # for testing
-#REPS = [1,1,1,1,1,1]  # for testing
 RESPONSE_VARS = [('Adults', ['Adult Drones', 'Adult Workers']),('Pupae',['Capped Drone Brood', 'Capped Worker Brood']),
                  ('Larvae', ['Drone Larvae', 'Worker Larvae']),  ('Eggs', ['Drone Eggs', 'Worker Eggs']),
                 ('Pollen', ['Colony Pollen (g)']), ('Nectar', ['Colony Nectar'])]
@@ -44,9 +42,6 @@ def simulate(pars, save = False, logs = False):
                 AILarvaSlope
     :return a dictionary of summary stats
     """
-    #print(DATA_DIR)
-    #print(INITIAL_DF)
-    #print(parameters)
     parameters = pars.copy() #copy our inputs so that we don't ever modify them (pyabc needs these)
     static_pars = {'SimStart': START_DATE, 'SimEnd': END_DATE, 'IPollenTrips': 8, 'INectarTrips': 17,
                    'AIHalfLife': 25, 'RQEnableReQueen': 'false'}
@@ -55,7 +50,6 @@ def simulate(pars, save = False, logs = False):
             static_pars[name] = value
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'weather/15055_grid_35.875_lat.wea')
-    #all_responses = pd.DataFrame(index = rows, columns = cols)
     all_responses = pd.DataFrame()
     for index, trt in enumerate(TREATMENTS):
         trt_responses_mean = np.empty((len(DATES), len(RESPONSE_VARS)))
@@ -88,30 +82,22 @@ def simulate(pars, save = False, logs = False):
         trt_responses_mean = pd.DataFrame(np.mean(rep_responses,axis=2), columns = mean_cols)
         trt_responses_sd = pd.DataFrame(np.std(rep_responses,axis=2, ddof=1), columns = sd_cols)  # Note: uses sample sd, not population sd
         trt_responses = pd.concat([trt_responses_mean, trt_responses_sd], axis = 1)
-        #print("Treatment {} responses: {}".format(trt,trt_responses))
         start_row = len(DATES)*index
         end_row = start_row + len(DATES)
-        #all_responses.loc[start_row:end_row,:] = trt_responses
         all_responses = all_responses.append(trt_responses, ignore_index=True)
 
     #Generate labels for rows and columns
     rows = ['_'.join(x) for x in product(TREATMENTS, DATES)]
-    #print('Row labels: {}'.format(rows))
     response_cols = [x[0] for x in RESPONSE_VARS]
     cols = ['_'.join([x,y]) for y in ['mean', 'sd'] for x in response_cols]
-    #print('Col labels: {}'.format(cols))
-
     all_responses['Index'] = pd.Series(rows)  # Add our row labels
     all_responses.set_index("Index", inplace=True)  # Set row labels to be the index
-    #print('Final result: {}'.format(all_responses))
     filtered_resp = all_responses.loc[:,RESPONSE_FILTER]  # Keep only the summary stats that we are using
-    #print('Filtered result: {}'.format(filtered_resp))
     output_dict = {}
     for row in filtered_resp.index:
         for col in filtered_resp.columns:
             label = "_".join([row,col])
             output_dict[label] = filtered_resp.loc[row,col]
-    #print('Output dictionary: {}'.format(output_dict))
     return output_dict
 
 
@@ -124,13 +110,9 @@ def filter_rep_responses(output, dates_str):
     """
 
     output.set_index('Date',inplace=True)
-    #print('REP output: {}'.format(output))
-    #print([output.loc[dates_str, cols[1]].sum(axis=1) for cols in RESPONSE_VARS])
     responses = [output.loc[dates_str, cols[1]].sum(axis=1) for cols in RESPONSE_VARS]
-    #print(responses)
     col_names = [x[0] for x in RESPONSE_VARS]
     response_df = pd.DataFrame.from_items(zip(col_names,responses))
-    #print("REP filtered responses: {}".format(response_df))
     return response_df
 
 
@@ -138,7 +120,6 @@ def generate_start(paras, trt):
     df = pd.read_csv(INITIAL_DF)
     df['treatment'] = df['treatment'].astype('str', copy=True)
     df.set_index('treatment', inplace=True)
-    #print("Initial conditions: {}".format(df))
     vars = ['adults', 'pupae', 'larvae', 'eggs', 'pollen', 'honey'] #numbers to generate
     vals = [-1,-1,-1,-1,-1,-1]
     for i, var in enumerate(vars):
@@ -186,7 +167,6 @@ def simulate_all_dates(pars, save = False, logs = False):
             static_pars[name] = value
     static_pars['NecPolFileEnable'] = 'true'
     weather_path = os.path.join(DATA_DIR,'weather/15055_grid_35.875_lat.wea')
-    #all_responses = pd.DataFrame(index = rows, columns = cols)
     all_responses = pd.DataFrame()
     for index, trt in enumerate(TREATMENTS):
         trt_responses_mean = np.empty((len(DATES), len(RESPONSE_VARS)))
@@ -215,21 +195,16 @@ def simulate_all_dates(pars, save = False, logs = False):
         trt_responses_mean = pd.DataFrame(np.mean(rep_responses,axis=2), columns = mean_cols)
         trt_responses_sd = pd.DataFrame(np.std(rep_responses,axis=2, ddof=1), columns = sd_cols)  # Note: uses sample sd, not population sd
         trt_responses = pd.concat([trt_responses_mean, trt_responses_sd], axis = 1)
-        #print("Treatment {} responses: {}".format(trt,trt_responses))
         start_row = len(DATES)*index
         end_row = start_row + len(DATES)
-        #all_responses.loc[start_row:end_row,:] = trt_responses
         all_responses = all_responses.append(trt_responses, ignore_index=True)
 
     #Generate labels for rows and columns
     rows = ['_'.join(x) for x in product(TREATMENTS, all_dates)]
     response_cols = [x[0] for x in RESPONSE_VARS]
     cols = ['_'.join([x,y]) for y in ['mean', 'sd'] for x in response_cols]
-
     all_responses['Index'] = pd.Series(rows)  # Add our row labels
     all_responses.set_index("Index", inplace=True)  # Set row labels to be the index
-    #print('Final result: {}'.format(all_responses))
-    #filtered_resp = all_responses.loc[:,'Adults_mean']  # Keep only the mean number of adults
     n_dates = len(all_dates)
     return_dfs = {}
     for response in RESPONSE_VARS:
