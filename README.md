@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/153177225.svg)](https://zenodo.org/badge/latestdoi/153177225)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4721797.svg)](https://doi.org/10.5281/zenodo.4721797)
 
 # Analysis of honey bee colony pesticide feeding study data using the VarroaPop+Pesticide model and Approximate Bayesian Computation.
 
